@@ -1208,6 +1208,12 @@
     <ClCompile Include="Basescape\PilotsState.cpp">
       <Filter>Basescape</Filter>
     </ClCompile>
+    <ClCompile Include="Battlescape\SoldierInfoState\SoldierInfoStatView.cpp">
+      <Filter>Battlescape\SoldierInfoState</Filter>
+    </ClCompile>
+    <ClCompile Include="Battlescape\SoldierInfoState\SoldierInfoView.cpp">
+      <Filter>Battlescape\SoldierInfoState</Filter>
+    </ClCompile>
     <ClCompile Include="Basescape\ScientistsState.cpp">
       <Filter>Basescape</Filter>
     </ClCompile>
@@ -2486,6 +2492,12 @@
     <ClInclude Include="Basescape\PilotsState.h">
       <Filter>Basescape</Filter>
     </ClInclude>
+    <ClInclude Include="Battlescape\SoldierInfoState\SoldierInfoStatView.h">
+      <Filter>Battlescape\SoldierInfoState</Filter>
+    </ClInclude>
+    <ClInclude Include="Battlescape\SoldierInfoState\SoldierInfoView.h">
+      <Filter>Battlescape\SoldierInfoState</Filter>
+    </ClInclude>
     <ClInclude Include="Basescape\ScientistsState.h">
       <Filter>Basescape</Filter>
     </ClInclude>
@@ -2529,6 +2541,9 @@
     </Filter>
     <Filter Include="FTA">
       <UniqueIdentifier>{9a188ad3-ed60-4de5-9646-633cddf63dee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Battlescape\SoldierInfoState">
+      <UniqueIdentifier>{738c2875-4cc8-4ac1-bb17-020e398bf5ad}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

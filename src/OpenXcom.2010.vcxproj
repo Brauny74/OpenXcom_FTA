@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -606,6 +606,8 @@
     <ClCompile Include="Savegame\Vehicle.cpp" />
     <ClCompile Include="Savegame\Waypoint.cpp" />
     <ClCompile Include="Savegame\WeightedOptions.cpp" />
+    <ClCompile Include="Battlescape\SoldierInfoState\SoldierInfoStatView.cpp" />
+    <ClCompile Include="Battlescape\SoldierInfoState\SoldierInfoView.cpp" />
     <ClCompile Include="Ufopaedia\ArticleState.cpp" />
     <ClCompile Include="Ufopaedia\ArticleStateArmor.cpp" />
     <ClCompile Include="Ufopaedia\ArticleStateBaseFacility.cpp" />
@@ -1031,6 +1033,8 @@
     <ClInclude Include="Savegame\Vehicle.h" />
     <ClInclude Include="Savegame\Waypoint.h" />
     <ClInclude Include="Savegame\WeightedOptions.h" />
+    <ClInclude Include="Battlescape\SoldierInfoState\SoldierInfoStatView.h" />
+    <ClInclude Include="Battlescape\SoldierInfoState\SoldierInfoView.h" />
     <ClInclude Include="Ufopaedia\ArticleState.h" />
     <ClInclude Include="Ufopaedia\ArticleStateArmor.h" />
     <ClInclude Include="Ufopaedia\ArticleStateBaseFacility.h" />
