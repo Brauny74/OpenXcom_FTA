@@ -37,6 +37,8 @@
 #include "../Battlescape/Inventory.h"
 #include "../Mod/Mod.h"
 #include "../Mod/Armor.h"
+#include "../Mod/AlienDeployment.h"
+#include "../Mod/BattleScript.h"
 #include "../Engine/Game.h"
 #include "../Engine/Sound.h"
 #include "../Mod/RuleInventory.h"
@@ -67,7 +69,7 @@ SavedBattleGame::SavedBattleGame(Mod *rule, Language *lang, bool isPreview) :
 	_lastSelectedUnit(0), _pathfinding(0), _tileEngine(0),
 	_reinforcementsItemLevel(0), _enviroEffects(nullptr), _ecEnabledFriendly(false), _ecEnabledHostile(false), _ecEnabledNeutral(false),
 	_globalShade(0), _side(FACTION_PLAYER), _turn(0), _bughuntMinTurn(20), _animFrame(0), _nameDisplay(false),
-	_debugMode(false), _bughuntMode(false), _aborted(false), _itemId(0),
+	_debugMode(false), _bughuntMode(false), _aborted(false), _itemId(0), _stealthMission(false),
 	_vipEscapeType(ESCAPE_NONE), _vipSurvivalPercentage(0), _vipsSaved(0), _vipsLost(0), _vipsWaitingOutside(0), _vipsSavedScore(0), _vipsLostScore(0), _vipsWaitingOutsideScore(0),
 	_objectiveType(-1), _objectivesDestroyed(0), _objectivesNeeded(0),
 	_unitsFalling(false), _cheating(false), _tuReserved(BA_NONE), _kneelReserved(false), _depth(0),
@@ -82,6 +84,26 @@ SavedBattleGame::SavedBattleGame(Mod *rule, Language *lang, bool isPreview) :
 	}
 	_baseItems = new ItemContainer();
 	_hitLog = new HitLog(lang);
+
+	auto mission = getAlienDeploymet();
+	if (!mission->getUndercoverArmors().empty())
+	{
+		_stealthMission = true;
+		
+	}
+	else if (!mission->getBattleScript().empty())
+	{
+		auto scripts = _rule->getBattleScript(mission->getBattleScript());
+		for (std::vector<BattleScript *>::const_iterator i = _rule->getBattleScript(mission->getBattleScript())->begin(); i != _rule->getBattleScript(mission->getBattleScript())->end(); ++i)
+		{
+			if ((*i)->getMinAlarm() > 0)
+			{
+				_stealthMission = true;
+				Log(LOG_INFO) << ">>> This mission considered as stealth mission because " << (*i)->getType() << " battleScript has min alarm level " << (*i)->getMinAlarm(); //#FINNIKTODO #CLEARLOGS
+				break;
+			}
+		}
+	}
 
 	setRandomHiddenMovementBackground(0);
 }
@@ -1357,6 +1379,11 @@ void SavedBattleGame::updateAlarm()
 			{
 				riseAlarm = true;
 			}
+		}
+		if ((*i)->getUnitWarned())
+		{
+			(*i)->setAlarmed(true);
+			(*i)->setUnitWarned(false);
 		}
 	}
 	if (riseAlarm)

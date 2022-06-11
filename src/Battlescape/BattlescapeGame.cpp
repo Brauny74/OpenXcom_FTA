@@ -1927,26 +1927,40 @@ void BattlescapeGame::primaryAction(Position pos)
 				auto units = _parentState->getBattleGame()->getSave()->getUnits();
 				for (BattleUnit *unit : *units)
 				{
-					if (noise >= 3) // super loud sounds alarm whole map
+					if (unit->getFaction() == FACTION_HOSTILE)
 					{
-						unit->setAlarmed(true);
-						continue;
-					}
-					auto shooterPos = _currentAction.actor->getPosition();
-					auto unitPos = unit->getPosition();
-					int dist = std::ceil(Position::distance(unitPos, shooterPos));
-					if (noise >= 2 && dist < 30)
-					{
-						unit->setAlarmed(true);
-						continue;
-					}
-					if (noise >= 1 && dist < 20)
-					{
-						unit->setAlarmed(true);
-						continue;
+						if (noise >= 3) // super loud sounds alarm whole map
+						{
+							unit->setUnitWarned(true);
+							continue;
+						}
+						auto shooterPos = _currentAction.actor->getPosition();
+						auto unitPos = unit->getPosition();
+						int dist = std::ceil(Position::distance(unitPos, shooterPos));
+						if (noise >= 2 && dist < 30)
+						{
+							unit->setUnitWarned(true);
+							continue;
+						}
+						if (noise >= 1 && dist < 15)
+						{
+							unit->setUnitWarned(true);
+							continue;
+						}
 					}
 				}
 			}
+		}
+
+		// handle stealth actions
+		if (_currentAction.type > 2)
+		{
+			_save->getSelectedUnit()->setRevealed(true);
+			Log(LOG_INFO) << "Unit " << _save->getSelectedUnit() << " is revealed"; //#FINNIKTODO #CLEARLOGS
+		}
+		else if (_currentAction.type == BA_WALK)
+		{
+			_save->getSelectedUnit()->setRevealed(false);
 		}
 	}
 	else

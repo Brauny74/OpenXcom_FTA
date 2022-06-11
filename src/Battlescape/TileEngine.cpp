@@ -872,6 +872,22 @@ bool TileEngine::calculateUnitsInFOV(BattleUnit* unit, const Position eventPos, 
 							{
 								(*i)->setVisible(true);
 							}
+
+							if (unit->getFaction() == FACTION_HOSTILE)
+							{
+								if ((*i)->getUndercover())
+								{
+									if ((*i)->tryUncover() && !unit->getUnitWarned())
+									{
+										unit->setUnitWarned(true);
+									}
+								}
+								else if (_save->isStealthMission())
+								{
+									unit->setUnitWarned(true);
+								}
+							}
+
 							if ((( (*i)->getFaction() == FACTION_HOSTILE && unit->getFaction() == FACTION_PLAYER )
 								|| ( (*i)->getFaction() != FACTION_HOSTILE && unit->getFaction() == FACTION_HOSTILE ))
 								&& !unit->hasVisibleUnit((*i)))
@@ -879,11 +895,14 @@ bool TileEngine::calculateUnitsInFOV(BattleUnit* unit, const Position eventPos, 
 								unit->addToVisibleUnits((*i));
 								unit->addToVisibleTiles((*i)->getTile());
 
-								if (unit->getFaction() == FACTION_HOSTILE && (*i)->getFaction() != FACTION_HOSTILE && _save->getSide() == FACTION_HOSTILE)
+								if (unit->getFaction() == FACTION_HOSTILE && (*i)->getFaction() != FACTION_HOSTILE)
 								{
 									(*i)->setTurnsSinceSpotted(0);
 
-									(*i)->setTurnsLeftSpottedForSnipers(std::max(unit->getSpotterDuration(), (*i)->getTurnsLeftSpottedForSnipers())); // defaults to 0 = no information given to snipers
+									if (_save->getSide() == FACTION_HOSTILE)
+									{
+										(*i)->setTurnsLeftSpottedForSnipers(std::max(unit->getSpotterDuration(), (*i)->getTurnsLeftSpottedForSnipers())); // defaults to 0 = no information given to snipers
+									}
 								}
 							}
 
