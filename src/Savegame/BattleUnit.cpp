@@ -65,7 +65,7 @@ BattleUnit::BattleUnit(const Mod *mod, Soldier *soldier, int depth) :
 	_faction(FACTION_PLAYER), _originalFaction(FACTION_PLAYER), _killedBy(FACTION_PLAYER), _id(0), _tile(0),
 	_lastPos(Position()), _direction(0), _toDirection(0), _directionTurret(0), _toDirectionTurret(0),
 	_verticalDirection(0), _status(STATUS_STANDING), _wantsToSurrender(false), _isSurrendering(false), _walkPhase(0), _fallPhase(0), _kneeled(false), _floating(false),
-	_dontReselect(false), _fire(0), _currentAIState(0), _visible(false), _warned(false), _alarmed(false), _wasFriendlyFired(false), _freshReinforcement(false), _undercover(false),
+	_dontReselect(false), _fire(0), _currentAIState(0), _visible(false), _warned(false), _alarmed(false), _wasFriendlyFired(false), _freshReinforcement(false), _undercover(false), _revealed(false),
 	_exp{ }, _expTmp{ },
 	_motionPoints(0), _scannedTurn(-1), _kills(0), _hitByFire(false), _hitByAnything(false), _alreadyExploded(false), _fireMaxHit(0), _smokeMaxHit(0), _moraleRestored(0), _charging(0), _turnsSinceSpotted(255), _turnsLeftSpottedForSnipers(0),
 	_statistics(), _murdererId(0), _mindControllerID(0), _fatalShotSide(SIDE_FRONT), _fatalShotBodyPart(BODYPART_HEAD), _armor(0),
@@ -436,7 +436,7 @@ BattleUnit::BattleUnit(const Mod *mod, Unit *unit, UnitFaction faction, int id, 
 	_faction(faction), _originalFaction(faction), _killedBy(faction), _id(id),
 	_tile(0), _lastPos(Position()), _direction(0), _toDirection(0), _directionTurret(0),
 	_toDirectionTurret(0), _verticalDirection(0), _status(STATUS_STANDING), _wantsToSurrender(false), _isSurrendering(false), _walkPhase(0),
-	_fallPhase(0), _kneeled(false), _floating(false), _dontReselect(false), _fire(0), _currentAIState(0), _warned(false), _alarmed(false), _wasFriendlyFired(false), _freshReinforcement(false),
+	_fallPhase(0), _kneeled(false), _floating(false), _dontReselect(false), _fire(0), _currentAIState(0), _warned(false), _alarmed(false), _undercover(false), _wasFriendlyFired(false), _freshReinforcement(false),
 	_visible(false), _exp{ }, _expTmp{ },
 	_motionPoints(0), _scannedTurn(-1), _kills(0), _hitByFire(false), _hitByAnything(false), _alreadyExploded(false), _fireMaxHit(0), _smokeMaxHit(0),
 	_moraleRestored(0), _charging(0), _turnsSinceSpotted(255), _turnsLeftSpottedForSnipers(0),
@@ -1257,30 +1257,27 @@ int BattleUnit::getDiagonalWalkingPhase() const
 	return (_walkPhase / 8) * 8;
 }
 
+/**
+ * Gets if the unit can be uncovered.
+ * @return if unit is not undercovered anymore for checking unit.
+ */
 bool BattleUnit::tryUncover()
 {
-	if (!_undercover) // main check
+	if (!_undercover)
 	{
-		return false;
+		return true;
 	}
 	else
 	{
-		auto weaponRightHand = getRightHandWeapon();
-		auto weaponLeftHand = getLeftHandWeapon();
-
-		if (weaponRightHand != nullptr || weaponLeftHand != nullptr)
+		if (getRightHandWeapon() == nullptr && getLeftHandWeapon() == nullptr)
 		{
-			if (_status != STATUS_STANDING || _status != STATUS_WALKING || _status != STATUS_TURNING || _status != STATUS_IGNORE_ME)
-			{
-				return false;
-			}
-
 			return _revealed;
 		}
-
-		return true;
+		else
+		{
+			return true;
+		}
 	}
-	
 }
 
 /**

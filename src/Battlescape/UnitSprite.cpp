@@ -48,7 +48,7 @@ UnitSprite::UnitSprite(Surface* dest, const Mod* mod, const SavedBattleGame* sav
 	_fireSurface(const_cast<Mod*>(mod)->getSurfaceSet("SMOKE.PCK")),
 	_breathSurface(const_cast<Mod*>(mod)->getSurfaceSet("BREATH-1.PCK", false)),
 	_facingArrowSurface(const_cast<Mod*>(mod)->getSurfaceSet("DETBLOB.DAT")),
-	_warnIndicator(const_cast<Mod*>(mod)->getSurface("FloorShockIndicator", false)),
+	_warnIndicator(const_cast<Mod*>(mod)->getSurface("UnitWarnedIndicator", false)),
 	_dest(dest), _save(save), _mod(mod),
 	_part(0), _animationFrame(frame), _drawingRoutine(0),
 	_helmet(helmet),
@@ -270,8 +270,12 @@ void UnitSprite::draw(const BattleUnit* unit, int part, int x, int y, int shade,
 		auto tmpSurface = _facingArrowSurface->getFrame(7 + ((unit->getDirection() + 1) % 8));
 		tmpSurface->blitNShade(_dest, _x, _y, 0);
 	}
+	drawUnitIcon();
+}
 
-	if (unit->getUnitWarned() && unit->getFaction() == FACTION_HOSTILE)
+void UnitSprite::drawUnitIcon()
+{
+	if (_unit->getUnitWarned() && _unit->getFaction() == FACTION_HOSTILE)
 	{
 		_warnIndicator->blitNShade(_dest, _x, _y, 0);
 	}

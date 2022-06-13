@@ -269,17 +269,18 @@ void ExplosionBState::init()
 			}
 
 			// update noise for enemy units
-			if (_parent->getMod()->getIsFTAGame())
+			if (_parent->getSave()->isStealthMission())
 			{
 				for (BattleUnit *unit : *_parent->getSave()->getUnits())
 				{
-					if (unit->getFaction() == FACTION_HOSTILE)
+					if (unit->getFaction() == FACTION_HOSTILE && !unit->getUnitWarned() && !unit->isOut())
 					{
 						int soundRange = _radius + 35;
 						int dist = std::ceil(Position::distance(unit->getPosition(), _center.toTile()));
 						if (dist <= soundRange)
 						{
 							unit->setUnitWarned(true);
+							Log(LOG_INFO) << "Unit is warned because explosion sound."; //#FINNIKTODO #CLEARLOGS
 							continue;
 						}
 					}

@@ -85,26 +85,6 @@ SavedBattleGame::SavedBattleGame(Mod *rule, Language *lang, bool isPreview) :
 	_baseItems = new ItemContainer();
 	_hitLog = new HitLog(lang);
 
-	auto mission = getAlienDeploymet();
-	if (!mission->getUndercoverArmors().empty())
-	{
-		_stealthMission = true;
-		
-	}
-	else if (!mission->getBattleScript().empty())
-	{
-		auto scripts = _rule->getBattleScript(mission->getBattleScript());
-		for (std::vector<BattleScript *>::const_iterator i = _rule->getBattleScript(mission->getBattleScript())->begin(); i != _rule->getBattleScript(mission->getBattleScript())->end(); ++i)
-		{
-			if ((*i)->getMinAlarm() > 0)
-			{
-				_stealthMission = true;
-				Log(LOG_INFO) << ">>> This mission considered as stealth mission because " << (*i)->getType() << " battleScript has min alarm level " << (*i)->getMinAlarm(); //#FINNIKTODO #CLEARLOGS
-				break;
-			}
-		}
-	}
-
 	setRandomHiddenMovementBackground(0);
 }
 
@@ -193,6 +173,11 @@ void SavedBattleGame::load(const YAML::Node &node, Mod *mod, SavedGame* savedGam
 	_bughuntMinTurn = node["bughuntMinTurn"].as<int>(_bughuntMinTurn);
 	_bughuntMode = node["bughuntMode"].as<bool>(_bughuntMode);
 	_depth = node["depth"].as<int>(_depth);
+	_stealthMission = node["stealthMission"].as<bool>(_stealthMission);
+	if (_stealthMission)
+	{
+		Log(LOG_INFO) << ">>> This mission considered as stealth mission because it was saved like that."; //#FINNIKTODO #CLEARLOGS
+	}
 	_animFrame = node["animFrame"].as<int>(_animFrame);
 	int selectedUnit = node["selectedUnit"].as<int>();
 
@@ -577,6 +562,7 @@ YAML::Node SavedBattleGame::save() const
 	node["flattenedMapBlockNames"] = _flattenedMapBlockNames;
 	node["globalshade"] = _globalShade;
 	node["turn"] = _turn;
+	node["stealthMission"] = _stealthMission;
 	node["alarmLvl"] = _alarmLvl;
 	node["battleScriptVars"] = _battleScriptVars;
 	node["bughuntMinTurn"] = _bughuntMinTurn;
@@ -1372,23 +1358,35 @@ void SavedBattleGame::updateAlarm()
 	bool riseAlarm = false;
 	for (std::vector<BattleUnit*>::iterator i = _units.begin(); i != _units.end(); ++i)
 	{
-		if ((*i)->getFaction() == FACTION_HOSTILE &&
-			((*i)->getStatus() != STATUS_DEAD) || ((*i)->getStatus() != STATUS_UNCONSCIOUS) || ((*i)->getStatus() != STATUS_PANICKING))
+		if ((*i)->getFaction() == FACTION_HOSTILE && !(*i)->isOut())
 		{
-			if ((*i)->getKills() || (*i)->getAlarmed())
+			if ((*i)->getAlarmed())
 			{
 				riseAlarm = true;
+				(*i)->setUnitWarned(false);
+				(*i)->setAlarmed(false);
+				Log(LOG_INFO) << "Unit not warned and alarmed anymore, because it was already alarmed and rised global alarm level on the map."; //#FINNIKTODO #CLEARLOGS
 			}
-		}
-		if ((*i)->getUnitWarned())
-		{
-			(*i)->setAlarmed(true);
-			(*i)->setUnitWarned(false);
+
+			if ((*i)->getUnitWarned())
+			{
+				(*i)->setAlarmed(true);
+				Log(LOG_INFO) << "Unit is alarmed because its warned status."; //#FINNIKTODO #CLEARLOGS
+
+			}
 		}
 	}
 	if (riseAlarm)
 	{
 		_alarmLvl += 1;
+		for (std::vector<BattleUnit*>::iterator i = _units.begin(); i != _units.end(); ++i)
+		{
+			if ((*i)->getFaction() == FACTION_PLAYER && !(*i)->getUndercover())
+			{
+				(*i)->setUndercover(false);
+			}
+		}
+		Log(LOG_INFO) << "Rising alarm level to " << _alarmLvl << " !"; //#FINNIKTODO #CLEARLOGS
 	}
 }
 /**
@@ -1611,7 +1609,11 @@ void SavedBattleGame::endTurn()
 	}
 	else if (_side == FACTION_HOSTILE)
 	{
-		updateAlarm();
+		if (isStealthMission())
+		{
+			updateAlarm();
+		}
+		
 		_selectedUnit =  0;
 		_side = FACTION_NEUTRAL;
 		// if there is no neutral team, we skip this and instantly prepare the new turn for the player
@@ -3158,6 +3160,30 @@ void SavedBattleGame::playRandomAmbientSound()
 	{
 		int soundIndex = RNG::seedless(0, _ambienceRandom.size() - 1);
 		getMod()->getSoundByDepth(_depth, _ambienceRandom.at(soundIndex))->play(3); // use fixed ambience channel; don't check if previous sound is still playing or not
+	}
+}
+
+void SavedBattleGame::defineStealth()
+{
+	auto mission = getAlienDeploymet();
+
+	if (!mission->getUndercoverArmors().empty())
+	{
+		_stealthMission = true;
+		Log(LOG_INFO) << ">>> This mission considered as stealth mission because it's deployment has defined Undercover Armors!"; //#FINNIKTODO #CLEARLOGS
+	}
+	else if (!mission->getBattleScript().empty())
+	{
+		auto scripts = _rule->getBattleScript(mission->getBattleScript());
+		for (std::vector<BattleScript*>::const_iterator i = _rule->getBattleScript(mission->getBattleScript())->begin(); i != _rule->getBattleScript(mission->getBattleScript())->end(); ++i)
+		{
+			if ((*i)->getMinAlarm() > 0)
+			{
+				_stealthMission = true;
+				Log(LOG_INFO) << ">>> This mission considered as stealth mission because " << (*i)->getType() << " battleScript has min alarm level " << (*i)->getMinAlarm(); //#FINNIKTODO #CLEARLOGS
+				break;
+			}
+		}
 	}
 }
 

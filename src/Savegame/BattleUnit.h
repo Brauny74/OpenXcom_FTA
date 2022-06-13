@@ -257,11 +257,11 @@ public:
 	/// Mark the unit as surrendering this turn.
 	void setSurrendering(bool isSurrendering);
 	/// Sets the unit's alarmed status.
-	void setAlarmed(bool isAlarmed) { _alarmed = isAlarmed; };
+	void setAlarmed(bool isAlarmed) { _alarmed = isAlarmed; Log(LOG_INFO) << "Unit " << this->getId() << " now has alarmed status: " << _alarmed;}; //#FINNIKTODO #CLEARLOGS
 	/// Gets the unit's alarmed status.
 	bool getAlarmed() const { return _alarmed; };
 	/// Sets the unit's warned status.
-	void setUnitWarned(bool warned) { _warned = warned; Log(LOG_INFO) << "Unit " << this->getId() << " now has warned status: " << _warned;};
+	void setUnitWarned(bool warned) { _warned = warned; };
 	/// Gets the unit's warned status.
 	bool getUnitWarned() const { return _warned; };
 	/// Check if unit's desguise still valid.
@@ -662,7 +662,7 @@ public:
 
 	/// Set BattleUnit's revealed status (used for stealth infiltration missions mechanics)
 	void setRevealed(bool revealed) { _revealed = revealed; }
-	
+	bool getRevealed() { return _revealed; }
 
 	/// Get this unit's original faction
 	UnitFaction getOriginalFaction() const;

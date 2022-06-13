@@ -126,6 +126,7 @@ void BattlescapeGenerator::init(bool resetTerrain)
 	// creates the tile objects
 	_save->initMap(_mapsize_x, _mapsize_y, _mapsize_z, resetTerrain);
 	_save->initUtilities(_mod);
+	_save->defineStealth();
 }
 
 /**
@@ -1108,14 +1109,6 @@ void BattlescapeGenerator::deployXCOM(const RuleStartingCondition* startingCondi
 					(*i)->clearEquipmentLayout();
 				}
 				BattleUnit *unit = addXCOMUnit(new BattleUnit(_game->getMod(), *i, _save->getDepth()));
-				for (auto a : _save->getAlienDeploymet()->getUndercoverArmors())
-				{
-					if (a == (*i)->getArmor()->getType())
-					{
-						unit->setUndercover(true);
-						break;
-					}
-				}
 				if (unit && !_save->getSelectedUnit())
 					_save->setSelectedUnit(unit);
 			}

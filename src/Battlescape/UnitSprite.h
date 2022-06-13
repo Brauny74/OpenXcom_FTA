@@ -113,6 +113,8 @@ public:
 	~UnitSprite();
 	/// Draws the unit.
 	void draw(const BattleUnit* unit, int part, int x, int y, int shade, GraphSubset mask, bool isAltPressed);
+	/// Draws special icon near the unit
+	void drawUnitIcon();
 };
 
 } //namespace OpenXcom

@@ -563,6 +563,7 @@ public:
 	void playRandomAmbientSound();
 	/// Gets if this battle is a stealth mission.
 	bool isStealthMission() const { return _stealthMission; }
+	void defineStealth();
 	// gets ruleset.
 	const Mod *getMod() const;
 	/// gets the list of items we're guaranteed.

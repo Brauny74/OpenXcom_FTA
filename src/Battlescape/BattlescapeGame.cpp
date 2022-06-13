@@ -1913,7 +1913,7 @@ void BattlescapeGame::primaryAction(Position pos)
 
 		//extra handling for not silent weapons
 		if ((_currentAction.type == BA_AUTOSHOT || _currentAction.type == BA_SNAPSHOT || _currentAction.type == BA_AIMEDSHOT) &&
-			_parentState->getGame()->getMod()->getIsFTAGame() &&
+			_save->isStealthMission() &&
 			fired)
 		{
 			int noise = _currentAction.weapon->getRules()->getNoiseValue();
@@ -1927,11 +1927,13 @@ void BattlescapeGame::primaryAction(Position pos)
 				auto units = _parentState->getBattleGame()->getSave()->getUnits();
 				for (BattleUnit *unit : *units)
 				{
-					if (unit->getFaction() == FACTION_HOSTILE)
+					if (unit->getFaction() == FACTION_HOSTILE && !unit->getUnitWarned()
+						&& !unit->isOut())
 					{
 						if (noise >= 3) // super loud sounds alarm whole map
 						{
 							unit->setUnitWarned(true);
+							Log(LOG_INFO) << "Unit is warned because firing sound."; //#FINNIKTODO #CLEARLOGS
 							continue;
 						}
 						auto shooterPos = _currentAction.actor->getPosition();
@@ -1940,11 +1942,13 @@ void BattlescapeGame::primaryAction(Position pos)
 						if (noise >= 2 && dist < 30)
 						{
 							unit->setUnitWarned(true);
+							Log(LOG_INFO) << "Unit is warned because firing sound."; //#FINNIKTODO #CLEARLOGS
 							continue;
 						}
 						if (noise >= 1 && dist < 15)
 						{
 							unit->setUnitWarned(true);
+							Log(LOG_INFO) << "Unit is warned because firing sound."; //#FINNIKTODO #CLEARLOGS
 							continue;
 						}
 					}
@@ -1953,14 +1957,15 @@ void BattlescapeGame::primaryAction(Position pos)
 		}
 
 		// handle stealth actions
-		if (_currentAction.type > 2)
+		if (_currentAction.type > 2 && _save->getSelectedUnit()->getFaction() == FACTION_PLAYER && _save->getSelectedUnit()->getUndercover())
 		{
 			_save->getSelectedUnit()->setRevealed(true);
-			Log(LOG_INFO) << "Unit " << _save->getSelectedUnit() << " is revealed"; //#FINNIKTODO #CLEARLOGS
+			Log(LOG_INFO) << "Unit " << _save->getSelectedUnit()->getGeoscapeSoldier()->getName() << " is revealed because action: " << _currentAction.type; //#FINNIKTODO #CLEARLOGS
 		}
-		else if (_currentAction.type == BA_WALK)
+		else if (_currentAction.type == BA_WALK && _save->getSelectedUnit()->getRevealed())
 		{
 			_save->getSelectedUnit()->setRevealed(false);
+			Log(LOG_INFO) << "We move, so unit " << _save->getSelectedUnit()->getGeoscapeSoldier()->getName() << " is not revealed anymore."; //#FINNIKTODO #CLEARLOGS
 		}
 	}
 	else
