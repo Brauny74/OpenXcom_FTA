@@ -78,6 +78,7 @@ private:
 	std::vector<Position> _storageTiles;
 	std::string _destroyedFacilityName;
 	const RuleBaseFacility* _destroyedFacility;
+	int _energySupply;
 
 
 	std::vector<std::string> _leavesBehindOnSellNames;
@@ -205,6 +206,8 @@ public:
 	const std::vector<Position> &getStorageTiles() const;
 	/// Gets the ruleset for the destroyed version of this facility.
 	const RuleBaseFacility* getDestroyedFacility() const;
+	/// Gets the facility's energy supply
+	int getEnergySupply() const;
 };
 
 }

@@ -40,7 +40,7 @@ RuleBaseFacility::RuleBaseFacility(const std::string &type) :
 	_size(1), _buildCost(0), _refundValue(0), _buildTime(0), _monthlyCost(0), _storage(0), _personnel(0), _aliens(0), _crafts(0),
 	_labs(0), _workshops(0), _psiLabs(0), _sightRange(0), _sightChance(0), _radarRange(0), _radarChance(0), _defense(0), _hitRatio(0), _fireSound(0), _hitSound(0), _ammoNeeded(1), _listOrder(0),
 	_trainingRooms(0), _maxAllowedPerBase(0), _sickBayAbsoluteBonus(0.0f), _sickBayRelativeBonus(0.0f),
-	_prisonType(0), _rightClickActionType(0), _verticalLevels(), _removalTime(0), _canBeBuiltOver(false), _destroyedFacility(0)
+															  _prisonType(0), _rightClickActionType(0), _verticalLevels(), _removalTime(0), _canBeBuiltOver(false), _destroyedFacility(0), _energySupply(0)
 {
 }
 
@@ -99,6 +99,7 @@ void RuleBaseFacility::load(const YAML::Node &node, Mod *mod, int listOrder)
 	_radarChance = node["radarChance"].as<int>(_radarChance);
 	_defense = node["defense"].as<int>(_defense);
 	_hitRatio = node["hitRatio"].as<int>(_hitRatio);
+	_energySupply = node["energySupply"].as<int>(_energySupply);
 
 	mod->loadSoundOffset(_type, _fireSound, node["fireSound"], "GEO.CAT");
 	mod->loadSoundOffset(_type, _hitSound, node["hitSound"], "GEO.CAT");
@@ -661,6 +662,17 @@ const std::vector<Position> &RuleBaseFacility::getStorageTiles() const
 const RuleBaseFacility* RuleBaseFacility::getDestroyedFacility() const
 {
 	return _destroyedFacility;
+}
+
+/**
+ * Returns the energy supply of this facility.
+ * negative number - facility consumes energy, positive - produce, 0 - no supply.
+ * @return energy supply.
+ */
+
+int RuleBaseFacility::getEnergySupply() const
+{
+	return _energySupply;
 }
 
 }

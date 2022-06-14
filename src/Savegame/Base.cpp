@@ -2178,6 +2178,25 @@ void Base::cleanupDefenses(bool reclaimItems)
 	Collections::deleteAll(_vehiclesFromBase);
 }
 
+/*
+* Returns energy balance of the base (sum of all energy supplied by buildings) 
+* 
+*/
+int Base::energyBalance() const
+{
+	int balance = 0;
+
+	for (std::vector<BaseFacility *>::const_iterator i = _facilities.begin(); i != _facilities.end(); ++i)
+	{
+		if ((*i)->getBuildTime() == 0)
+		{
+			balance += (*i)->getRules()->getEnergySupply();
+		}
+	}
+
+	return balance;
+}
+
 /**
  * Check if any facilities in a given area are used.
  */

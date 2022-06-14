@@ -301,6 +301,8 @@ public:
 	void cleanupPrisons(int prisonType);
 	/// Cleans up the defenses vector and optionally reclaims the tanks and their ammo.
 	void cleanupDefenses(bool reclaimItems);
+	/// Method for base energy balance
+	int energyBalance() const;
 
 	/// Check if any facilities in a given area are used.
 	BasePlacementErrors isAreaInUse(BaseAreaSubset area, const RuleBaseFacility* replacement = nullptr) const;
