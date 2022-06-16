@@ -63,7 +63,7 @@ namespace OpenXcom
 * @param base Pointer to the base to get info from.
 * @param rule RuleCovertOperation to start.
 */
-CovertOperationStartState::CovertOperationStartState(Base* base, RuleCovertOperation* rule) : _base(base), _rule(rule), _chances(0), _cost(0),
+CovertOperationStartState::CovertOperationStartState(Base* base, RuleCovertOperation* rule) : _base(base), _rule(rule), _cost(0), _chances(0),
 																							  _scientists(0), _engeneers(0), _hasPsiItems(false), _hasPsionics(false)
 {
 	_items = new ItemContainer();
@@ -235,7 +235,7 @@ void CovertOperationStartState::init()
 	_txtChances->setText(tr("STR_OPERATION_CHANCES_UC").arg(tr(getOperationOddsString(mod))));
 	_txtChances->setAlign(ALIGN_RIGHT);
 
-	_btnStart->setVisible(_soldiers.size() >= _rule->getSoldierSlots());
+	_btnStart->setVisible(static_cast<int>(_soldiers.size()) >= _rule->getSoldierSlots());
 	auto reqItems = _rule->getRequiredItemList();
 	if (!reqItems.empty())
 	{
@@ -284,16 +284,12 @@ void CovertOperationStartState::init()
 			x += 10;
 		}
 	}
-
-	Surface* frame2 = texture->getFrame(40);
-	SurfaceSet* customItemPreviews = _game->getMod()->getSurfaceSet("CustomItemPreviews");
 	x = 0;
 
-
-	Surface* frame3 = texture->getFrame(39);
+	Surface* frame2 = texture->getFrame(39);
 	for (int i = 0; i < _items->getTotalQuantity(); i += 4, x += 10)
 	{
-		frame3->blitNShade(_equip, x, 0);
+		frame2->blitNShade(_equip, x, 0);
 	}
 }
 
@@ -741,7 +737,7 @@ double CovertOperationStartState::getOperationOdds()
 		double reactEffect = (soldierReactions / assignedSoldiersN);
 		double tuEffect = (soldiersTU / assignedSoldiersN);
 		double staEffect = (soldiersSta / assignedSoldiersN);
-		_chances += rankEffect + bravEffect + reactEffect + soldiersPsi + tuEffect + staEffect;
+		_chances += officerEffect + rankEffect + bravEffect + reactEffect + soldiersPsi + tuEffect + staEffect;
 
 		// let's check if itemset has specific FTA's item categories
 		if (!_rule->getAllowAllEquipment())
@@ -819,8 +815,7 @@ int CovertOperationStartState::getOperationCost()
 */
 void CovertOperationStartState::removeSoldier(Soldier* soldier)
 {
-	auto iter = std::find(std::begin(_soldiers), std::end(_soldiers), soldier);
-	for (int k = 0; k < _soldiers.size(); k++) {
+	for (size_t k = 0; k < _soldiers.size(); k++) {
 		if (_soldiers[k] == soldier) {
 			_soldiers.erase(_soldiers.begin() + k);
 		}

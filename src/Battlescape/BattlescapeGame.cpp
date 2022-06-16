@@ -427,6 +427,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 			else
 			{
 				statePushBack(new ProjectileFlyBState(this, action));
+				processWeaponNoise();
 			}
 		}
 	}
@@ -1020,6 +1021,36 @@ bool BattlescapeGame::scriptsToProcess()
 		}
 	}
 	return false;
+}
+
+void BattlescapeGame::processWeaponNoise()
+{
+	if (!_save->isStealthMission())
+		return;
+
+	int noise = _currentAction.weapon->getRules()->getNoiseValue();;
+	if (_currentAction.type == BA_AUTOSHOT)
+	{
+		noise *= _currentAction.weapon->getRules()->getConfigAuto()->shots;
+	}
+
+	if (noise > 0)
+	{
+		auto units = _parentState->getBattleGame()->getSave()->getUnits();
+		for (BattleUnit* unit : *units)
+		{
+			if (unit->getFaction() == FACTION_HOSTILE && !unit->getUnitWarned()
+				&& !unit->isOut())
+			{
+				if (noise >= std::ceil(Position::distance(unit->getPosition(), _currentAction.actor->getPosition()) / 15))
+				{
+					unit->setUnitWarned(true);
+					Log(LOG_INFO) << "Unit is warned because firing sound."; //#FINNIKTODO #CLEARLOGS
+					continue;
+				}
+			}
+		}
+	}
 }
 
 /**
@@ -1739,7 +1770,6 @@ bool BattlescapeGame::isBusy() const
 void BattlescapeGame::primaryAction(Position pos)
 {
 	bool bPreviewed = Options::battleNewPreviewPath != PATH_NONE;
-	bool fired = false;
 
 	getMap()->resetObstacles();
 
@@ -1798,6 +1828,7 @@ void BattlescapeGame::primaryAction(Position pos)
 				_parentState->getGame()->getCursor()->setVisible(false);
 				_currentAction.cameraPosition = getMap()->getCamera()->getMapOffset();
 				_states.push_back(new ProjectileFlyBState(this, _currentAction));
+				processWeaponNoise();
 				statePushFront(new UnitTurnBState(this, _currentAction));
 				_currentAction.sprayTargeting = false;
 				_currentAction.waypoints.clear();
@@ -1907,46 +1938,20 @@ void BattlescapeGame::primaryAction(Position pos)
 			_parentState->getGame()->getCursor()->setVisible(false);
 			_currentAction.cameraPosition = getMap()->getCamera()->getMapOffset();
 			_states.push_back(new ProjectileFlyBState(this, _currentAction));
+			processWeaponNoise();
 			statePushFront(new UnitTurnBState(this, _currentAction)); // first of all turn towards the target
-			fired = true;
 		}
 
-		//extra handling for not silent weapons
-		if ((_currentAction.type == BA_AUTOSHOT || _currentAction.type == BA_SNAPSHOT || _currentAction.type == BA_AIMEDSHOT) &&
-			_parentState->getGame()->getMod()->getIsFTAGame() &&
-			fired)
+		// handle undercover actions
+		if (_currentAction.type > 2 && _save->getSelectedUnit()->getFaction() == FACTION_PLAYER && _save->getSelectedUnit()->getUndercover())
 		{
-			int noise = _currentAction.weapon->getRules()->getNoiseValue();
-			if (_currentAction.type == BA_AUTOSHOT)
-			{
-				noise *= _currentAction.weapon->getRules()->getConfigAuto()->shots;
-			}
-
-			if (noise > 0)
-			{
-				auto units = _parentState->getBattleGame()->getSave()->getUnits();
-				for (BattleUnit *unit : *units)
-				{
-					if (noise >= 3) // super loud sounds alarm whole map
-					{
-						unit->setAlarmed(true);
-						continue;
-					}
-					auto shooterPos = _currentAction.actor->getPosition();
-					auto unitPos = unit->getPosition();
-					int dist = std::ceil(Position::distance(unitPos, shooterPos));
-					if (noise >= 2 && dist < 30)
-					{
-						unit->setAlarmed(true);
-						continue;
-					}
-					if (noise >= 1 && dist < 20)
-					{
-						unit->setAlarmed(true);
-						continue;
-					}
-				}
-			}
+			_save->getSelectedUnit()->setRevealed(true);
+			Log(LOG_INFO) << "Unit " << _save->getSelectedUnit()->getGeoscapeSoldier()->getName() << " is revealed because action: " << _currentAction.type; //#FINNIKTODO #CLEARLOGS
+		}
+		else if (_currentAction.type == BA_WALK && _save->getSelectedUnit()->getRevealed())
+		{
+			_save->getSelectedUnit()->setRevealed(false);
+			Log(LOG_INFO) << "We move, so unit " << _save->getSelectedUnit()->getGeoscapeSoldier()->getName() << " is not revealed anymore."; //#FINNIKTODO #CLEARLOGS
 		}
 	}
 	else
@@ -2066,6 +2071,7 @@ void BattlescapeGame::launchAction()
 	_parentState->getGame()->getCursor()->setVisible(false);
 	_currentAction.cameraPosition = getMap()->getCamera()->getMapOffset();
 	_states.push_back(new ProjectileFlyBState(this, _currentAction));
+	processWeaponNoise();
 	statePushFront(new UnitTurnBState(this, _currentAction)); // first of all turn towards the target
 }
 
@@ -2817,7 +2823,23 @@ bool BattlescapeGame::takeItem(BattleItem* item, BattleAction *action)
 			if (slot != -1)
 			{
 				BattleActionCost cost{ unit };
-				cost.Time += Mod::EXTENDED_ITEM_RELOAD_COST ? i->getSlot()->getCost(weapon->getSlot()) : 0;
+				bool extendedItemReloadCost = false;
+				if (weapon->getRules()->getExtendedItemReloadCostLocal() != 0)
+				{
+					if (weapon->getRules()->getExtendedItemReloadCostLocal() == 1)
+					{
+						extendedItemReloadCost = true;
+					}
+					else if (weapon->getRules()->getExtendedItemReloadCostLocal() == 2)
+					{
+						extendedItemReloadCost = false;
+					}
+					cost.Time += extendedItemReloadCost ? i->getSlot()->getCost(weapon->getSlot()) : 0;
+				}
+				else
+				{
+					cost.Time += Mod::EXTENDED_ITEM_RELOAD_COST ? i->getSlot()->getCost(weapon->getSlot()) : 0;
+				}
 				cost.Time += weapon->getRules()->getTULoad(slot);
 				if (cost.haveTU() && !weapon->getAmmoForSlot(slot))
 				{
@@ -3339,8 +3361,6 @@ void BattlescapeGame::processBattleScripts(const std::vector<BattleScript*>* scr
 {
 	// create an array to track command success/failure
 	std::map<int, bool> conditionals;
-	int mapsize_x = _save->getMapSizeX();
-	int mapsize_y = _save->getMapSizeY();
 
 	for (std::vector<BattleScript*>::const_iterator i = script->begin(); i != script->end(); ++i)
 	{
@@ -3381,7 +3401,6 @@ void BattlescapeGame::processBattleScripts(const std::vector<BattleScript*>* scr
 		{
 			throw Exception("Battle script processor encountered an error: multiple commands are sharing the same label.");
 		}
-		bool& success = conditionals[command->getLabel()] = false;
 
 		// if this command runs conditionally on the failures or successes of previous commands
 		if (!command->getConditionals()->empty())
@@ -3413,7 +3432,6 @@ void BattlescapeGame::processBattleScripts(const std::vector<BattleScript*>* scr
 		// if there's a chance a command won't execute by design, take that into account here.
 		if (RNG::percent(command->getChancesOfExecution()))
 		{
-			auto blocks = _save->getMapDataSets();
 			// each command can be attempted multiple times, as randomization within the rects may occur
 			for (int j = 0; j < command->getExecutions(); ++j)
 			{
@@ -3583,7 +3601,7 @@ bool OpenXcom::BattlescapeGame::scriptSpawnUnit(BattleScript* command)
 	auto units = command->getUnitSet();
 	if (units.empty())
 	{
-		throw Exception("BattleScript generator encountered an error: no units defined for: " + command->getType());
+		throw Exception("BattleScript generator encountered an error: no units defined");
 	}
 	int zMin = command->getMinLevel();
 	int zMax = command->getMaxLevel();

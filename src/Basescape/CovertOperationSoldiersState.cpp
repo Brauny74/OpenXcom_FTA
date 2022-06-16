@@ -367,7 +367,6 @@ void CovertOperationSoldiersState::lstSoldiersClick(Action* action)
 		bool matched = false;
 		auto iter = std::find(std::begin(opSoldiers), std::end(opSoldiers), s);
 		bool busy = ((s->getCraft() && s->getCraft()->getStatus() == "STR_OUT") || s->getCovertOperation() || s->hasPendingTransformation());
-		bool psiUnavailable = false;
 		if (!Options::anytimePsiTraining && s->isInPsiTraining())
 		{
 			busy = true;
@@ -393,10 +392,9 @@ void CovertOperationSoldiersState::lstSoldiersClick(Action* action)
 		{
 			color = _otherCraftColor;
 		}
-		else if (s->hasFullHealth() & !busy)
+		else if (s->hasFullHealth() && !busy)
 		{
 			int space = (_operation->getRule()->getSoldierSlots() + _operation->getRule()->getOptionalSoldierSlots()) - opSoldiers.size();
-			int armorSize = s->getArmor()->getSize();
 			if (space > 0)
 			{
 				_operation->addSoldier(s);
