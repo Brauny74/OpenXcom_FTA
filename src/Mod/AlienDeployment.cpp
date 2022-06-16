@@ -255,7 +255,7 @@ void AlienDeployment::load(const YAML::Node &node, Mod *mod)
 	_minShade = node["minShade"].as<int>(_minShade);
 	_maxShade = node["maxShade"].as<int>(_maxShade);
 	_nextStage = node["nextStage"].as<std::string>(_nextStage);
-	_race = node["race"].as<std::string>(_race);
+	_race = node["raceType"] .as<std::string>(_race);
 	_randomRaces = node["randomRace"].as<std::vector<std::string> >(_randomRaces);
 	_finalDestination = node["finalDestination"].as<bool>(_finalDestination);
 	_winCutscene = node["winCutscene"].as<std::string>(_winCutscene);

@@ -66,7 +66,7 @@ void Unit::load(const YAML::Node &node, Mod *mod)
 	{
 		_spawnedSoldier = node["spawnedSoldier"];
 	}
-	_race = node["race"].as<std::string>(_race);
+	_race = node["raceType"] .as<std::string>(_race);
 	_showFullNameInAlienInventory = node["showFullNameInAlienInventory"].as<int>(_showFullNameInAlienInventory);
 	_rank = node["rank"].as<std::string>(_rank);
 	_stats.merge(node["stats"].as<UnitStats>(_stats));

@@ -47,7 +47,7 @@ void MissionSite::load(const YAML::Node &node)
 	Target::load(node);
 	_texture = node["texture"].as<int>(_texture);
 	_secondsRemaining = node["secondsRemaining"].as<size_t>(_secondsRemaining);
-	_race = node["race"].as<std::string>(_race);
+	_race = node["raceType"] .as<std::string>(_race);
 	_inBattlescape = node["inBattlescape"].as<bool>(_inBattlescape);
 	_detected = node["detected"].as<bool>(_detected);
 	//_missionCustomDeploy loaded outside
@@ -67,7 +67,7 @@ YAML::Node MissionSite::save() const
 	node["texture"] = _texture;
 	if (_secondsRemaining)
 		node["secondsRemaining"] = _secondsRemaining;
-	node["race"] = _race;
+	node["raceType"]  = _race;
 	if (_inBattlescape)
 		node["inBattlescape"] = _inBattlescape;
 	node["detected"] = _detected;

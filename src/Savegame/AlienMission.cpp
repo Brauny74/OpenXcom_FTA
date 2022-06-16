@@ -81,7 +81,7 @@ private:
 void AlienMission::load(const YAML::Node& node, SavedGame &game, const Mod* mod)
 {
 	_region = node["region"].as<std::string>(_region);
-	_race = node["race"].as<std::string>(_race);
+	_race = node["raceType"] .as<std::string>(_race);
 	_nextWave = node["nextWave"].as<size_t>(_nextWave);
 	_nextUfoCounter = node["nextUfoCounter"].as<size_t>(_nextUfoCounter);
 	_spawnCountdown = node["spawnCountdown"].as<size_t>(_spawnCountdown);
@@ -136,7 +136,7 @@ YAML::Node AlienMission::save() const
 	YAML::Node node;
 	node["type"] = _rule.getType();
 	node["region"] = _region;
-	node["race"] = _race;
+	node["raceType"]  = _race;
 	node["nextWave"] = _nextWave;
 	node["nextUfoCounter"] = _nextUfoCounter;
 	node["spawnCountdown"] = _spawnCountdown;

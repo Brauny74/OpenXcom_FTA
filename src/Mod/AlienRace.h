@@ -23,7 +23,6 @@
 #include "../Savegame/WeightedOptions.h"
 
 enum AlienRank{AR_HUMAN = -1, AR_COMMANDER, AR_LEADER, AR_ENGINEER, AR_MEDIC, AR_NAVIGATOR, AR_SOLDIER, AR_TERRORIST, AR_TERRORIST2};
-enum RaceType : int {RACE_ALIENS, RACE_HUMANS, RACE_MONSTERS};
 
 namespace OpenXcom
 {
@@ -42,9 +41,7 @@ private:
 	std::vector<std::string> _members;
 	std::vector< std::vector<std::string> > _membersRandom;
 	int _retaliationAggression;
-	RaceType _raceType;
-
-  public:
+public:
 	/// Creates a blank alien race ruleset.
 	AlienRace(const std::string &id);
 	/// Cleans up the alien race ruleset.
@@ -53,8 +50,6 @@ private:
 	void load(const YAML::Node& node);
 	/// Gets the alien race's id.
 	const std::string &getId() const;
-	/// Gets the alien race's type.
-	const RaceType &getRaceType() const { return _raceType; };
 	/// Gets the alien base weapon deploy.
 	const std::string &getBaseCustomDeploy() const;
 	/// Gets the alien base mission.

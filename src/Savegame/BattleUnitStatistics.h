@@ -69,7 +69,7 @@ struct BattleUnitKills
 		}
 		type = node["type"].as<std::string>(type);
 		rank = node["rank"].as<std::string>(rank);
-		race = node["race"].as<std::string>(race);
+		race = node["raceType"] .as<std::string>(race);
 		weapon = node["weapon"].as<std::string>(weapon);
 		weaponAmmo = node["weaponAmmo"].as<std::string>(weaponAmmo);
 		status = (UnitStatus)node["status"].as<int>();
@@ -90,7 +90,7 @@ struct BattleUnitKills
 		if (!type.empty())
 			node["type"] = type;
 		node["rank"] = rank;
-		node["race"] = race;
+		node["raceType"]  = race;
 		node["weapon"] = weapon;
 		node["weaponAmmo"] = weaponAmmo;
 		node["status"] = (int)status;

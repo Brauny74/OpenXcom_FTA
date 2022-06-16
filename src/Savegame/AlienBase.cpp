@@ -46,7 +46,7 @@ void AlienBase::load(const YAML::Node &node)
 {
 	Target::load(node);
 	_pactCountry = node["pactCountry"].as<std::string>(_pactCountry);
-	_race = node["race"].as<std::string>(_race);
+	_race = node["raceType"] .as<std::string>(_race);
 	_inBattlescape = node["inBattlescape"].as<bool>(_inBattlescape);
 	_discovered = node["discovered"].as<bool>(_discovered);
 	_startMonth = node["startMonth"].as<int>(_startMonth);
@@ -62,7 +62,7 @@ YAML::Node AlienBase::save() const
 {
 	YAML::Node node = Target::save();
 	node["pactCountry"] = _pactCountry;
-	node["race"] = _race;
+	node["raceType"]  = _race;
 	if (_inBattlescape)
 		node["inBattlescape"] = _inBattlescape;
 	if (_discovered)

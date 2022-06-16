@@ -40,8 +40,6 @@
 #include "../Mod/RuleSoldier.h"
 #include "../Mod/RuleUfo.h"
 #include "../Mod/Armor.h"
-#include "../Mod/Unit.h"
-#include "../Mod/AlienRace.h"
 #include "../Savegame/AlienBase.h"
 #include "../Savegame/AlienMission.h"
 #include "../Savegame/Base.h"
@@ -510,8 +508,6 @@ void DebriefingState::init()
 	int total = 0, statsY = 0, recoveryY = 0;
 	int civiliansSaved = 0, civiliansDead = 0;
 	int aliensKilled = 0, aliensStunned = 0;
-	int humansKilled = 0, humansStunned = 0;
-	int monstersKilled = 0, monstersStunned = 0;
 	for (std::vector<DebriefingStat*>::iterator i = _stats.begin(); i != _stats.end(); ++i)
 	{
 		if ((*i)->qty == 0)
@@ -546,22 +542,6 @@ void DebriefingState::init()
 		if ((*i)->item == "STR_LIVE_ALIENS_RECOVERED")
 		{
 			aliensStunned += (*i)->qty;
-		}
-		if ((*i)->item == "STR_MONSTERS_KILLED")
-		{
-			monstersKilled += (*i)->qty;
-		}
-		if ((*i)->item == "STR_LIVE_MONSTERS_RECOVERED")
-		{
-			monstersStunned += (*i)->qty;
-		}
-		if ((*i)->item == "STR_HUMANS_KILLED")
-		{
-			humansKilled += (*i)->qty;
-		}
-		if ((*i)->item == "STR_LIVE_HUMANS_RECOVERED")
-		{
-			humansStunned += (*i)->qty;
 		}
 		}
 		if (civiliansSaved && !civiliansDead && _missionStatistics->success == true)
@@ -768,10 +748,6 @@ void DebriefingState::init()
 		{
 			int soldierAlienKills = 0;
 			int soldierAlienStuns = 0;
-			int soldierMosterKills = 0;
-			int soldierMonsterStuns = 0;
-			int soldierHumansKills = 0;
-			int soldierHumansStuns = 0;
 			for (std::vector<BattleUnitKills*>::const_iterator k = (*j)->getStatistics()->kills.begin(); k != (*j)->getStatistics()->kills.end(); ++k)
 			{
 				if ((*k)->faction == FACTION_HOSTILE && (*k)->status == STATUS_DEAD)
@@ -1117,10 +1093,6 @@ void DebriefingState::prepareDebriefing()
 
 	_stats.push_back(new DebriefingStat("STR_ALIENS_KILLED", false));
 	_stats.push_back(new DebriefingStat("STR_ALIEN_CORPSES_RECOVERED", false));
-	_stats.push_back(new DebriefingStat("STR_MONSTERS_KILLED", false));
-	_stats.push_back(new DebriefingStat("STR_MONSTERS_CORPSES_RECOVERED", false));
-	_stats.push_back(new DebriefingStat("STR_HUMANS_KILLED", false));
-	_stats.push_back(new DebriefingStat("STR_HUMANS_CORPSES_RECOVERED", false));
 	_stats.push_back(new DebriefingStat("STR_LIVE_ALIENS_RECOVERED", false));
 	_stats.push_back(new DebriefingStat("STR_LIVE_ALIENS_SURRENDERED", false));
 	_stats.push_back(new DebriefingStat("STR_ALIEN_ARTIFACTS_RECOVERED", false));
@@ -1465,7 +1437,7 @@ void DebriefingState::prepareDebriefing()
 	{
 		for (std::vector<BattleUnit*>::iterator j = battle->getUnits()->begin(); j != battle->getUnits()->end(); ++j)
 		{
-				// if only one soldier survived, give him a medal! (unless he killed all the others...)
+			// if only one soldier survived, give him a medal! (unless he killed all the others...)
 			if ((*j)->getStatus() != STATUS_DEAD && (*j)->getOriginalFaction() == FACTION_PLAYER && !(*j)->getStatistics()->hasFriendlyFired() && deadSoldiers != 0)
 			{
 				(*j)->getStatistics()->loneSurvivor = true;
@@ -1598,17 +1570,7 @@ void DebriefingState::prepareDebriefing()
 		{ // so this is a dead unit
 			if (oldFaction == FACTION_HOSTILE && (*j)->killedBy() == FACTION_PLAYER)
 			{
-				RaceType type = _game->getMod()->getAlienRace((*j)->getUnitRules()->getRace())->getRaceType();
-				switch (type)
-				{
-				case RACE_MONSTERS:
-					addStat("STR_MONSTERS_KILLED", 1, value);
-				case RACE_HUMANS:
-					addStat("STR_HUMANS_KILLED", 1, value);
-				default:
-					addStat("STR_ALIENS_KILLED", 1, value);
-					break;
-				}
+				addStat("STR_ALIENS_KILLED", 1, value);
 			}
 			else if (oldFaction == FACTION_PLAYER)
 			{
@@ -2907,34 +2869,19 @@ void DebriefingState::recoverAlien(BattleUnit *from, Base *base)
 		RuleResearch *research = _game->getMod()->getResearch(ruleLiveAlienItem->getType());
 		bool surrendered = (!from->isOut() || from->isIgnored())
 			&& (from->isSurrendering() || _game->getSavedGame()->getSavedBattle()->getChronoTrigger() == FORCE_WIN_SURRENDER);
-		std::string surrenderedText, recoveredText;
-		RaceType type = _game->getMod()->getAlienRace(from->getUnitRules()->getRace())->getRaceType();
-		switch (type)
-		{
-		case RACE_MONSTERS:
-			surrenderedText = "STR_LIVE_MONSTERS_SURRENDERED";
-			recoveredText = "STR_LIVE_MONSTERS_RECOVERED";
-		case RACE_HUMANS:
-			surrenderedText = "STR_LIVE_HUMANS_SURRENDERED";
-			recoveredText = "STR_LIVE_HUMANS_RECOVERED";
-		default:
-			surrenderedText = "STR_LIVE_ALIENS_SURRENDERED";
-			recoveredText = "STR_LIVE_ALIENS_RECOVERED";
-			break;
-		}
 		if (research != 0 && !_game->getSavedGame()->isResearched(research))
 		{
 			// more points if it's not researched
-			addStat(surrendered ? surrenderedText : recoveredText, 1, from->getValue() * 2);
+			addStat(surrendered ? "STR_LIVE_ALIENS_SURRENDERED" : "STR_LIVE_ALIENS_RECOVERED", 1, from->getValue() * 2);
 		}
 		else if (_game->getMod()->getGiveScoreAlsoForResearchedArtifacts())
 		{
-			addStat(surrendered ? surrenderedText : recoveredText, 1, from->getValue() * 2);
+			addStat(surrendered ? "STR_LIVE_ALIENS_SURRENDERED" : "STR_LIVE_ALIENS_RECOVERED", 1, from->getValue() * 2);
 		}
 		else
 		{
 			// 10 points for recovery
-			addStat(surrendered ? surrenderedText : recoveredText, 1, 10);
+			addStat(surrendered ? "STR_LIVE_ALIENS_SURRENDERED" : "STR_LIVE_ALIENS_RECOVERED", 1, 10);
 		}
 
 		addItemsToBaseStores(ruleLiveAlienItem, base, 1, false);

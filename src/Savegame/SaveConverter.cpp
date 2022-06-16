@@ -576,7 +576,7 @@ void SaveConverter::loadDatMissions()
 			YAML::Node node;
 			AlienMission *m = new AlienMission(*_mod->getAlienMission(_rules->getMissions()[mission], true));
 			node["region"] = _rules->getRegions()[region];
-			node["race"] = _rules->getCrews()[race];
+			node["raceType"]  = _rules->getCrews()[race];
 			node["nextWave"] = wave;
 			node["nextUfoCounter"] = ufoCounter;
 			node["spawnCountdown"] = spawn * 30;
@@ -966,7 +966,7 @@ void SaveConverter::loadDatCraft()
 					YAML::Node subnode;
 					m = new AlienMission(*_mod->getAlienMission(_rules->getMissions()[mission], true));
 					subnode["region"] = _rules->getRegions()[region];
-					subnode["race"] = _rules->getCrews()[load<Uint16>(cdata + _rules->getOffset("CRAFT.DAT_RACE"))];
+					subnode["raceType"]  = _rules->getCrews()[load<Uint16>(cdata + _rules->getOffset("CRAFT.DAT_RACE"))];
 					subnode["nextWave"] = 1;
 					subnode["nextUfoCounter"] = 0;
 					subnode["spawnCountdown"] = 1000;
