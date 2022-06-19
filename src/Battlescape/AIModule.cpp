@@ -808,6 +808,13 @@ void AIModule::setupAttack()
 	// if enemies are known to us but not necessarily visible, we can attack them with a blaster launcher or psi or a sniper attack.
 	if (_knownEnemies)
 	{
+		//some extra FtA stealth logic first
+		if (_save->isStealthMission() && _save->getAlarmLevel() == 0 && _save->getGeoscapeSave()->getDifficulty() < 3)
+		{
+			_attackAction.type = BA_NONE;
+			return;
+		}
+
 		if (psiAction())
 		{
 			// at this point we can save some time with other calculations - the unit WILL make a psionic attack this turn.
