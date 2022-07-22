@@ -627,10 +627,9 @@ void Soldier::setCraft(Craft *craft, bool resetCustomDeployment)
  */
 std::string Soldier::getCurrentDuty(Language *lang, const BaseSumDailyRecovery &recovery, bool &isBusy, bool &isFree, DutyMode mode) const
 {
-	//std::string s;
 	isBusy = false;
 	isFree = false;
-	bool facility = (mode == LAB || mode == ASSIGN);
+	bool facility = (mode == LAB || mode == ASSIGN || mode == WORK);
 	if (_death)
 	{
 		if (_death->getCause())
