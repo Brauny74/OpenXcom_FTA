@@ -346,7 +346,6 @@ void ManufactureAllocateEngineers::lstEngineersClick(Action* action)
 		if (matched)
 		{
 			_planningProject->removeEngineer(s);
-			Log(LOG_INFO) << " _freeSpace :" << _freeSpace << " initial space: " << _spaceTest;
 			if (s->getProductionProject())
 			{
 				if (s->getProductionProject()->getRules() == _planningProject->getManufactureRules())
@@ -367,7 +366,6 @@ void ManufactureAllocateEngineers::lstEngineersClick(Action* action)
 			{
 				_lstEngineers->setCellText(row, 1, duty);
 				_freeSpace++;
-				Log(LOG_INFO) << " _freeSpace :" << _freeSpace << " initial space: " << _spaceTest;
 				if (isBusy || !isFree || s->getCraft() != 0)
 				{
 					color = _otherCraftColor;
@@ -398,7 +396,6 @@ void ManufactureAllocateEngineers::lstEngineersClick(Action* action)
 				if (noProject)
 				{
 					_freeSpace--;
-					Log(LOG_INFO) << " _freeSpace :" << _freeSpace << " initial space: " << _spaceTest;
 				}
 			}
 		}
