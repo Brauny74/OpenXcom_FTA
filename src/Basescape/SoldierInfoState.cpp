@@ -75,6 +75,8 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 	{
 		_list = _base->getSoldiers();
 	}
+
+	_ftaUI = _game->getMod()->getIsFTAGame();
 	_localChange = false;
 
 	// Create objects
@@ -88,7 +90,7 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 	_btnBonuses = new TextButton(16, 14, 242, 33);
 	_edtSoldier = new TextEdit(this, 210, 16, 40, 9);
 	_btnSack = new TextButton(60, 14, 260, 33);
-	if (_ftaUi)
+	if (_ftaUI)
 	{
 		_btnDiary = new TextButton(60, 14, 260, 33);
 	}
@@ -192,7 +194,7 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 
 	_btnSack->setText(tr("STR_SACK"));
 	_btnSack->onMouseClick((ActionHandler)&SoldierInfoState::btnSackClick);
-	if (_ftaUi)
+	if (_ftaUI)
 	{
 		_btnSack->setVisible(false);
 		_btnSack->setX(0); //go away!
@@ -213,7 +215,7 @@ SoldierInfoState::SoldierInfoState(Base *base, size_t soldierId) : _base(base), 
 	_cbxRoles->setOptions(_rolesList, true);
 	_cbxRoles->setSelected(0);
 	_cbxRoles->onChange((ActionHandler)&SoldierInfoState::cbxRolesChange);
-	_cbxRoles->setVisible(_ftaUi);
+	_cbxRoles->setVisible(_ftaUI);
 
 	_txtPsionic->setText(tr("STR_IN_PSIONIC_TRAINING"));
 
@@ -283,7 +285,7 @@ void SoldierInfoState::init()
 
 	SurfaceSet *texture = _game->getMod()->getSurfaceSet("BASEBITS.PCK");
 	auto frame = texture->getFrame(_soldier->getRankSprite());
-	if (_ftaUi)
+	if (_ftaUI)
 	{
 		frame = texture->getFrame(_soldier->getRoleRankSprite(role));
 	}
@@ -340,7 +342,7 @@ void SoldierInfoState::init()
 	{
 		_btnSack->setVisible(false);
 	}
-	_txtRank->setText(tr("STR_RANK_").arg(tr(_soldier->getRankString(_ftaUi))));
+	_txtRank->setText(tr("STR_RANK_").arg(tr(_soldier->getRankString(_ftaUI))));
 
 	_txtMissions->setText(tr("STR_MISSIONS").arg(_soldier->getMissions()));
 
@@ -1480,7 +1482,7 @@ void OpenXcom::SoldierInfoState::displayPsionic(SoldierRole selected)
 
 	bool psi = _soldier->getStatsWithSoldierBonusesOnly()->psiSkill > 0
 		&& (selected == ROLE_SOLDIER || selected == ROLE_AGENT || selected == ROLE_PILOT);
-	if (psi || ((Options::psiStrengthEval && !_ftaUi) && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())))
+	if (psi || ((Options::psiStrengthEval && !_ftaUI) && _game->getSavedGame()->isResearched(_game->getMod()->getPsiRequirements())))
 	{
 		_txtPsiStrength->setVisible(true);
 		_numPsiStrength->setVisible(true);
