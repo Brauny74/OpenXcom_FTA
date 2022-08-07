@@ -442,6 +442,7 @@ struct UnitStats
 				return p.second + suffix;
 			}
 		}
+		return "NONE";
 	}
 
 	static UnitStats templateMerge(const UnitStats& origStats, const UnitStats& fixedStats)

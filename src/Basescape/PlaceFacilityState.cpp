@@ -24,6 +24,7 @@
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
 #include "BaseView.h"
+#include "FacilityAllocateEngineersState.h"
 #include "../Savegame/Base.h"
 #include "../Savegame/BaseFacility.h"
 #include "../Savegame/ItemContainer.h"
@@ -304,14 +305,6 @@ void PlaceFacilityState::viewClick(Action *)
 			}
 			_base->getFacilities()->push_back(fac);
 
-			//Making production for FtA game logic
-			if (_ftaUi)
-			{
-				Production* project = new Production(_game->getMod()->getManufacture("STR_FACILITY_CONSTRUCTION"), 1);
-				_base->addProduction(project);
-				project->setFacility(fac);
-			}
-
 			if (Options::allowBuildingQueue && !_ftaUi)
 			{
 				if (_view->isQueuedBuilding(_rule)) fac->setBuildTime(INT_MAX);
@@ -323,7 +316,18 @@ void PlaceFacilityState::viewClick(Action *)
 			{
 				_base->getStorageItems()->removeItem(i.first, i.second.first);
 			}
-			_game->popState();
+			//Making production for FtA game logic
+			if (_ftaUi)
+			{
+				Production* project = new Production(_game->getMod()->getManufacture("STR_FACILITY_CONSTRUCTION"), 1);
+				_base->addProduction(project);
+				project->setFacility(fac);
+				_game->pushState(new FacilityAllocateEngineersState(_base, project));
+			}
+			else
+			{
+				_game->popState();
+			}
 		}
 	}
 }

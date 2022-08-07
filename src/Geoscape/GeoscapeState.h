@@ -193,6 +193,7 @@ private:
 	bool buttonsDisabled();
 	void updateSlackingIndicator();
 	void handleResearch(Base *base);
+	void handleFacilityConstruction(Base* base);
 	int getResearchStepProgress(ResearchProject* project, std::map<Soldier*, int> &assignedScientists);
 };
 
