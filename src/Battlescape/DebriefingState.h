@@ -69,12 +69,13 @@ private:
 	Base *_base;
 	std::vector<DebriefingStat*> _stats;
 	std::vector<SoldierStatsEntry> _soldierStats;
+	std::map<DiplomacyFaction*, int> _factionChange;
 	TextButton *_btnOk, *_btnStats, *_btnSell, *_btnTransfer;
 	Window *_window;
 	Text *_txtTitle, *_txtItem, *_txtQuantity, *_txtScore, *_txtRecovery, *_txtRating, *_txtLoyalty;
 	Text *_txtSoldier, *_txtTU, *_txtStamina, *_txtHealth, *_txtBravery, *_txtReactions;
 	Text *_txtFiring, *_txtThrowing, *_txtMelee, *_txtStrength, *_txtPsiStrength, *_txtPsiSkill;
-	TextList *_lstStats, *_lstRecovery, *_lstTotal, *_lstSoldierStats, *_lstRecoveredItems;
+	TextList *_lstStats, *_lstRecovery, *_lstTotal, *_lstSoldierStats, *_lstRecoveredItems, *_lstFactions;
 	std::string _currentTooltip;
 	Text *_txtTooltip;
 	std::vector<ReequipStat> _missingItems;
@@ -110,6 +111,8 @@ private:
 	void applyVisibility();
 	/// Creates a string for the soldier stats table from a stat difference value
 	std::string makeSoldierString(int stat);
+	/// Calculates Diplomacy Faction change from unit.
+	void updateFactionsUnits(BattleUnit* unit, bool evacObj, bool saved);
 public:
 	/// Creates the Debriefing state.
 	DebriefingState();

@@ -38,6 +38,7 @@
 #include "../Mod/RuleItem.h"
 #include "../Mod/RuleRegion.h"
 #include "../Mod/RuleSoldier.h"
+#include "../Mod/RuleDiplomacyFaction.h"
 #include "../Mod/RuleUfo.h"
 #include "../Mod/Armor.h"
 #include "../Savegame/AlienBase.h"
@@ -48,6 +49,7 @@
 #include "../Savegame/Craft.h"
 #include "../Savegame/ItemContainer.h"
 #include "../Savegame/Region.h"
+#include "../Savegame/DiplomacyFaction.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "../Savegame/Soldier.h"
 #include "../Savegame/SoldierDiary.h"
@@ -123,6 +125,7 @@ DebriefingState::DebriefingState() : _eventToSpawn(nullptr), _region(0), _countr
 	
 	_lstStats = new TextList(290, 80, 16, 32);
 	_lstRecovery = new TextList(290, 80, 16, 32);
+	_lstFactions = new TextList(290, 80, 16, 32);
 	_lstTotal = new TextList(290, 9, 16, 12);
 
 	// Second page (soldier stats)
@@ -328,6 +331,7 @@ DebriefingState::~DebriefingState()
 	_roundsStimulant.clear();
 	_roundsHeal.clear();
 	_recoveredItems.clear();
+	_factionChange.clear();
 }
 
 std::string DebriefingState::makeSoldierString(int stat)
@@ -1076,6 +1080,12 @@ void DebriefingState::prepareDebriefing()
 		}
 	}
 
+	// Populate factions list
+	for (auto f : save->getDiplomacyFactions())
+	{
+		_factionChange.insert(std::make_pair(f, 0));
+	}
+
 	bool aborted = battle->isAborted();
 	bool success = !aborted || battle->allObjectivesDestroyed();
 	Craft *craft = 0;
@@ -1537,7 +1547,7 @@ void DebriefingState::prepareDebriefing()
 		UnitFaction faction = (*j)->getFaction();
 		UnitFaction oldFaction = (*j)->getOriginalFaction();
 		int value = (*j)->getValue();
-		bool evacObj = false, terminateObj = false;
+		bool evacObj = false, terminateObj = false, saved = false;
 		if ((*j)->getGeoscapeSoldier() == 0)
 		{
 			if ((*j)->getOriginalFaction() == FACTION_PLAYER)
@@ -1651,8 +1661,13 @@ void DebriefingState::prepareDebriefing()
 					|| (aborted && (*j)->isInExitArea(END_POINT)))
 				{ // so game is not aborted or aborted and unit is on exit area
 					bool notOver = true;
+					saved = true;
 					if (evacObj) //FtA Logic
 					{
+						if ((*j)->wasFriendlyFired())
+						{
+							value = ceil(value / 2);
+						}
 						addStat("STR_VIP_SAVED", 1, value);
 						notOver = handleVipRecovery((*j), base, craft, true);
 						vipsSaved++;
@@ -1709,6 +1724,7 @@ void DebriefingState::prepareDebriefing()
 				else
 				{ // so game is aborted and unit is not on exit area
 					playersSurvived--;
+					saved = false;
 					if (evacObj)
 					{
 						addStat("STR_VIP_LOST", 1, - (value * 2));
@@ -1755,6 +1771,7 @@ void DebriefingState::prepareDebriefing()
 					{
 						recoverAlien(*j, base);
 					}
+					saved = true;
 				}
 			}
 			else if (oldFaction == FACTION_HOSTILE && !aborted && !_destroyBase
@@ -1773,6 +1790,7 @@ void DebriefingState::prepareDebriefing()
 					{
 						recoverAlien(*j, base);
 					}
+					saved = true;
 				}
 			}
 			else if (oldFaction == FACTION_NEUTRAL)
@@ -1783,6 +1801,7 @@ void DebriefingState::prepareDebriefing()
 					if (!(*j)->isResummonedFakeCivilian() && !(*j)->isCosmetic())
 					{
 						addStat("STR_CIVILIANS_KILLED_BY_ALIENS", 1, -value);
+						saved = false;
 					}
 				}
 				else
@@ -1790,11 +1809,13 @@ void DebriefingState::prepareDebriefing()
 					if (!(*j)->isResummonedFakeCivilian() && !(*j)->isCosmetic())
 					{
 						addStat("STR_CIVILIANS_SAVED", 1, value);
+						saved = true;
 					}
 					recoverCivilian(*j, base);
 				}
 			}
 		}
+		updateFactionsUnits((*j), evacObj, saved);
 	}
 	bool lostCraft = false;
 	if (craft != 0 && ((playersInExitArea == 0 && aborted) || (playersSurvived == 0)))
@@ -2363,6 +2384,21 @@ void DebriefingState::prepareDebriefing()
 
 	// remember the base for later use (of course only if it's not lost already (in that case base=0))
 	_base = base;
+
+	for (auto const& [faction, value] : _factionChange)
+	{
+		if (value != 0)
+		{
+			std::ostringstream line;
+			line << tr(faction->getRules()->getName()) << " " << tr("STR_REPUTATION_CHANGE");
+
+		}
+
+		std::cout << key        // string (key)
+				  << ':'  
+				  << val        // string's value
+				  << std::endl;
+	}
 }
 
 /**
@@ -2975,6 +3011,90 @@ int DebriefingState::getTotalRecoveredItemCount()
 		total += item.second;
 	}
 	return total;
+}
+
+/**
+ * Helper to debriefing process in part of diplomacy faction updates.
+ * @param unit BattleUnit.
+ */
+void DebriefingState::updateFactionsUnits(BattleUnit* unit, bool evacObj, bool saved)
+{
+	auto race = unit->getUnitRules()->getRace();
+	if (race.empty())
+	{
+		return; //in ruleset race defines if unit belongs to faction
+	}
+	DiplomacyFaction* unitDiplomacyFaction = nullptr;
+	for (auto f : _game->getSavedGame()->getDiplomacyFactions())
+	{
+		if (race == f->getRules()->getName())
+		{
+			unitDiplomacyFaction = f;
+		}
+	}
+	if (!unitDiplomacyFaction)
+	{
+		return; //not a factional unit, so we don't care
+	}
+
+	UnitStatus status = unit->getStatus();
+	int unitScore = ceil(unit->getValue() / 2); // normal points for unit is too much for factional reputation score
+
+	if (status == STATUS_DEAD)
+	{
+		if (unit->killedBy() == FACTION_PLAYER)
+		{
+			if (unit->getOriginalFaction() == FACTION_PLAYER || unit->getOriginalFaction() == FACTION_NEUTRAL)
+			{
+				unitScore *= -2; //case friendly fire kill
+			}
+			else
+			{
+				unitScore *= -1; //enemy faction unit
+			}
+		}
+		else //not a player's frag
+		{
+			unitScore = -ceil(unitScore / 2);
+		}
+	}
+	else
+	{
+		if (unit->getOriginalFaction() != FACTION_HOSTILE)
+		{
+			if (!saved)
+			{
+				unitScore *= -1;
+				
+			}
+			else
+			{
+				if (evacObj)
+				{
+					unitScore *= 2;
+				}
+
+				if (unit->wasFriendlyFired())
+				{
+					unitScore = ceil(unitScore / 3);
+				}
+			}
+		}
+		else if (saved)
+		{
+			unitScore *= -1;
+		}
+	}
+
+	// now we can assign diplomacy faction reputation change based on their unit conditions.
+	if (unitScore != 0)
+	{
+		if ( !_factionChange.insert(std::make_pair( unitDiplomacyFaction, unitScore )).second )
+		{
+			//  Element already present...
+			_factionChange[unitDiplomacyFaction] = _factionChange.at(unitDiplomacyFaction) + unitScore;
+		}
+	}
 }
 
 /**

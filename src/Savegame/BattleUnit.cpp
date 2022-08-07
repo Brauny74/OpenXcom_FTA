@@ -1638,10 +1638,19 @@ int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type
 		return 0;
 	}
 
+	BattleUnit* damager;
 	if (attack.attacker != nullptr)
 	{
-		if ((attack.attacker->getFaction() == FACTION_PLAYER && this->getFaction() == FACTION_PLAYER)
-			&& (attack.type == BA_AUTOSHOT || attack.type == BA_SNAPSHOT || attack.type == BA_AIMEDSHOT || attack.type == BA_HIT) 
+		damager = attack.attacker;
+	}
+	else if (attack.damage_item->getPreviousOwner() != nullptr)
+	{
+		damager = attack.damage_item->getPreviousOwner();
+	}
+
+	if (damager)
+	{
+		if ((attack.attacker->getFaction() != FACTION_HOSTILE && this->getFaction() == FACTION_HOSTILE) 
 			&& save->getGeoscapeSave()->isFtAGame())
 		{
 			int baseChange = -5;
@@ -1649,8 +1658,21 @@ int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type
 			attack.attacker->moraleChange(baseChange + (2 * save->getGeoscapeSave()->getDifficultyCoefficient()) + RNG::generate(0, 5));
 
 			this->setFrienlyFired(true);
+			Log(LOG_DEBUG) << "Unit was friendly fired!"; //#FINNIKTODO #CLEARLOGS
+
+			if (this->getUnitRules()->getSpecialObjective() == SPECOBJ_FRIENDLY_VIP)
+			{
+				for (auto unit : *save->getUnits())
+				{
+					if (unit->getFaction() == FACTION_PLAYER)
+					{
+						unit->moraleChange(baseChange - (save->getGeoscapeSave()->getDifficultyCoefficient()) - RNG::generate(0, 3));
+					}
+				}
+			}
 		}
 	}
+	
 
 	RNG::RandomState rand = RNG::globalRandomState().subSequence();
 	damage = reduceByResistance(damage, type->ResistType);
