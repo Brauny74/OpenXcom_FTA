@@ -1638,19 +1638,9 @@ int BattleUnit::damage(Position relative, int damage, const RuleDamageType *type
 		return 0;
 	}
 
-	BattleUnit* damager;
 	if (attack.attacker != nullptr)
 	{
-		damager = attack.attacker;
-	}
-	else if (attack.damage_item->getPreviousOwner() != nullptr)
-	{
-		damager = attack.damage_item->getPreviousOwner();
-	}
-
-	if (damager)
-	{
-		if ((attack.attacker->getFaction() != FACTION_HOSTILE && this->getFaction() == FACTION_HOSTILE) 
+		if ((attack.attacker->getFaction() != FACTION_HOSTILE && this->getFaction() == FACTION_PLAYER) 
 			&& save->getGeoscapeSave()->isFtAGame())
 		{
 			int baseChange = -5;

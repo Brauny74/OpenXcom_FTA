@@ -1550,16 +1550,10 @@ void DebriefingState::prepareDebriefing()
 		UnitFaction oldFaction = (*j)->getOriginalFaction();
 		int value = (*j)->getValue();
 		bool evacObj = false, terminateObj = false, saved = false;
-		if ((*j)->getGeoscapeSoldier() == 0)
+		if ((*j)->getUnitRules()) 
 		{
-			if ((*j)->getOriginalFaction() == FACTION_PLAYER)
-			{
-				evacObj = (*j)->getUnitRules()->getSpecialObjective() == SPECOBJ_FRIENDLY_VIP;
-			}
-			else if ((*j)->getOriginalFaction() == FACTION_HOSTILE)
-			{
-				terminateObj = (*j)->getUnitRules()->getSpecialObjective() == SPECOBJ_ENEMY_VIP;
-			}
+			evacObj = (*j)->getUnitRules()->getSpecialObjective() == SPECOBJ_FRIENDLY_VIP;
+			terminateObj = (*j)->getUnitRules()->getSpecialObjective() == SPECOBJ_ENEMY_VIP;
 		}
 		Soldier *soldier = save->getSoldier((*j)->getId());
 
@@ -3015,6 +3009,10 @@ int DebriefingState::getTotalRecoveredItemCount()
  */
 void DebriefingState::updateFactionsUnits(BattleUnit* unit, bool evacObj, bool saved)
 {
+	if (!unit->getUnitRules())
+	{
+		return; //case we deal with originally created geoscape soldier with no unit rules at all.
+	}
 	auto race = unit->getUnitRules()->getRace();
 	if (race.empty())
 	{
