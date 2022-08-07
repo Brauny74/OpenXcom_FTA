@@ -46,8 +46,9 @@ struct DebriefingStat {
 	int qty;
 	int score;
 	bool recovery;
+	bool faction;
 
-	DebriefingStat(const std::string &_item, bool _recovery) : item(_item), qty(0), score(0), recovery(_recovery) {};
+	DebriefingStat(const std::string &_item, bool _recovery, bool _faction = false) : item(_item), qty(0), score(0), recovery(_recovery), faction(_faction) {};
 	};
 
 struct ReequipStat { std::string item; int qty; std::string craft; int listOrder; };
@@ -75,7 +76,7 @@ private:
 	Text *_txtTitle, *_txtItem, *_txtQuantity, *_txtScore, *_txtRecovery, *_txtRating, *_txtLoyalty;
 	Text *_txtSoldier, *_txtTU, *_txtStamina, *_txtHealth, *_txtBravery, *_txtReactions;
 	Text *_txtFiring, *_txtThrowing, *_txtMelee, *_txtStrength, *_txtPsiStrength, *_txtPsiSkill;
-	TextList *_lstStats, *_lstRecovery, *_lstTotal, *_lstSoldierStats, *_lstRecoveredItems, *_lstFactions;
+	TextList *_lstStats, *_lstRecovery, *_lstTotal, *_lstSoldierStats, *_lstRecoveredItems;
 	std::string _currentTooltip;
 	Text *_txtTooltip;
 	std::vector<ReequipStat> _missingItems;

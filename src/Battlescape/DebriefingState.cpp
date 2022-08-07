@@ -125,7 +125,6 @@ DebriefingState::DebriefingState() : _eventToSpawn(nullptr), _region(0), _countr
 	
 	_lstStats = new TextList(290, 80, 16, 32);
 	_lstRecovery = new TextList(290, 80, 16, 32);
-	_lstFactions = new TextList(290, 80, 16, 32);
 	_lstTotal = new TextList(290, 9, 16, 12);
 
 	// Second page (soldier stats)
@@ -1080,12 +1079,6 @@ void DebriefingState::prepareDebriefing()
 		}
 	}
 
-	// Populate factions list
-	for (auto f : save->getDiplomacyFactions())
-	{
-		_factionChange.insert(std::make_pair(f, 0));
-	}
-
 	bool aborted = battle->isAborted();
 	bool success = !aborted || battle->allObjectivesDestroyed();
 	Craft *craft = 0;
@@ -1154,6 +1147,15 @@ void DebriefingState::prepareDebriefing()
 	for (std::map<int, RecoveryItem*>::const_iterator i = _recoveryStats.begin(); i != _recoveryStats.end(); ++i)
 	{
 		_stats.push_back(new DebriefingStat((*i).second->name, true));
+	}
+
+	// Populate factions list
+	for (auto f : save->getDiplomacyFactions())
+	{
+		_factionChange.insert(std::make_pair(f, 0));
+		std::ostringstream line;
+		line << tr(f->getRules()->getName()) << " " << tr("STR_REPUTATION_CHANGE");
+		_stats.push_back(new DebriefingStat(line.str(), false, true));
 	}
 
 	_missionStatistics->time = *save->getTime();
@@ -2385,19 +2387,13 @@ void DebriefingState::prepareDebriefing()
 	// remember the base for later use (of course only if it's not lost already (in that case base=0))
 	_base = base;
 
+	// apply diplomacy faction reputation score
 	for (auto const& [faction, value] : _factionChange)
 	{
 		if (value != 0)
 		{
-			std::ostringstream line;
-			line << tr(faction->getRules()->getName()) << " " << tr("STR_REPUTATION_CHANGE");
-
+			faction->setReputationScore(faction->getReputationScore() + value);
 		}
-
-		std::cout << key        // string (key)
-				  << ':'  
-				  << val        // string's value
-				  << std::endl;
 	}
 }
 
@@ -3087,6 +3083,10 @@ void DebriefingState::updateFactionsUnits(BattleUnit* unit, bool evacObj, bool s
 	}
 
 	// now we can assign diplomacy faction reputation change based on their unit conditions.
+	std::ostringstream line;
+	line << tr(unitDiplomacyFaction->getRules()->getName()) << " " << tr("STR_REPUTATION_CHANGE");
+	addStat(line.str(), 1, unitScore);
+
 	if (unitScore != 0)
 	{
 		if ( !_factionChange.insert(std::make_pair( unitDiplomacyFaction, unitScore )).second )
