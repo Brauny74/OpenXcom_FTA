@@ -241,6 +241,7 @@ set ( interface_src
 
 set ( menu_src
   Menu/AbandonGameState.cpp
+  Menu/ConfirmActionState.cpp
   Menu/ConfirmLoadState.cpp
   Menu/CutsceneState.cpp
   Menu/DeleteGameState.cpp

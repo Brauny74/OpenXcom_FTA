@@ -451,6 +451,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="md5.cpp" />
     <ClCompile Include="Menu\AbandonGameState.cpp" />
+    <ClCompile Include="Menu\ConfirmActionState.cpp" />
     <ClCompile Include="Menu\ConfirmLoadState.cpp" />
     <ClCompile Include="Menu\CutsceneState.cpp" />
     <ClCompile Include="Menu\ListGamesState.cpp" />
@@ -844,6 +845,7 @@
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="md5.h" />
     <ClInclude Include="Menu\AbandonGameState.h" />
+    <ClInclude Include="Menu\ConfirmActionState.h" />
     <ClInclude Include="Menu\ConfirmLoadState.h" />
     <ClInclude Include="Menu\CutsceneState.h" />
     <ClInclude Include="Menu\ListGamesState.h" />
