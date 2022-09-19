@@ -1913,7 +1913,7 @@ void BattlescapeGame::primaryAction(Position pos)
 
 		//extra handling for not silent weapons
 		if ((_currentAction.type == BA_AUTOSHOT || _currentAction.type == BA_SNAPSHOT || _currentAction.type == BA_AIMEDSHOT) &&
-			_parentState->getGame()->getMod()->getIsFTAGame() &&
+			_parentState->getGame()->getMod()->isFTAGame() &&
 			fired)
 		{
 			int noise = _currentAction.weapon->getRules()->getNoiseValue();

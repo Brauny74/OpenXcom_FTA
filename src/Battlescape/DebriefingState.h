@@ -81,7 +81,7 @@ private:
 	std::map<const RuleItem*, int> _rounds, _roundsPainKiller, _roundsStimulant, _roundsHeal, _recoveredItems;
 	Uint8 _ammoColor;
 	std::map<int, RecoveryItem*> _recoveryStats;
-	bool _positiveScore, _destroyBase, _promotions, _showSellButton, _initDone;
+	bool _positiveScore, _destroyBase, _promotions, _showSellButton, _initDone, _fta;
 	std::map<int, int>  _containmentStateInfo;
 	int _totalEvacObjs, _savedEvacObjs, _recoveredItemObjs;
 	int _limitsEnforced;
@@ -96,6 +96,8 @@ private:
 	void addItemsToBaseStores(const std::string &itemType, Base *base, int quantity, bool considerTransformations);
 	/// Recovers items from the battlescape.
 	void recoverItems(std::vector<BattleItem*> *from, Base *base);
+	/// FTA method to recover prosners instead of items.
+	void recoverPrisoner(BattleUnit* from, Base* base);
 	/// Recovers a civilian from the battlescape.
 	void recoverCivilian(BattleUnit *from, Base *base);
 	/// Recovers an alien from the battlescape.

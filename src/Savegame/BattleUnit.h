@@ -42,6 +42,7 @@ class Surface;
 class RuleInventory;
 class RuleEnviroEffects;
 class Soldier;
+class RuleSoldier;
 class SavedGame;
 class Language;
 class AIModule;
@@ -153,6 +154,7 @@ private:
 	Armor *_armor;
 	SoldierGender _gender;
 	Soldier *_geoscapeSoldier;
+	std::vector<SoldierRole> _roles;
 	std::vector<int> _loftempsSet;
 	Unit *_unitRules;
 	int _rankInt;
@@ -194,6 +196,8 @@ private:
 	void applyPercentages(RuleItemUseCost &cost, const RuleItemUseCost &flat) const;
 	/// Helper function to aid with equipping stackable items (FTA)
 	bool canStackToSlot(BattleItem* item, RuleInventory* slot, int x, int y) const;
+
+	void loadRoles(const std::vector<int>& r);
 public:
 	static const int MAX_SOLDIER_ID = 1000000;
 	static const int BUBBLES_FIRST_FRAME = 3;
@@ -284,6 +288,8 @@ public:
 	void abortTurn();
 	/// Gets the soldier's gender.
 	SoldierGender getGender() const;
+	/// Gets the unit's roles
+	std::vector<SoldierRole> getRoles() const { return _roles; }
 	/// Gets the unit's faction.
 	UnitFaction getFaction() const;
 	/// Gets unit sprite recolors values.
@@ -297,7 +303,7 @@ public:
 	/// Have unit floor below?
 	bool haveNoFloorBelow() const { return _haveNoFloorBelow; }
 	/// Sets soldier ID if it was created.
-	void setGeoscapeSoldied(Soldier* soldier);
+	void setGeoscapeSoldier(Soldier* soldier);
 	int getKills() const { return _kills; };
 
 	/// Aim.

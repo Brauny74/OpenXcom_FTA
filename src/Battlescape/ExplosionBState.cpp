@@ -269,7 +269,7 @@ void ExplosionBState::init()
 			}
 
 			// update noise for enemy units
-			if (_parent->getMod()->getIsFTAGame())
+			if (_parent->getMod()->isFTAGame())
 			{
 				auto units = _parent->getSave()->getUnits();
 				for (BattleUnit *unit : *units)

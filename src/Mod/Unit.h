@@ -29,6 +29,9 @@ namespace OpenXcom
 class Mod;
 class Armor;
 class RuleItem;
+class RuleSoldier;
+enum SoldierRole : int;
+class RulePrisoner;
 class ModScript;
 class ScriptParserBase;
 
@@ -786,6 +789,9 @@ private:
 	int _showFullNameInAlienInventory;
 	std::string _rank;
 	UnitStats _stats, _statsRandom;
+	std::vector<SoldierRole> _roles;
+	std::string _prisonerName;
+	const RulePrisoner* _prisoner = nullptr;
 	std::string _armorName;
 	const Armor* _armor;
 	int _standHeight, _kneelHeight, _floatHeight;
@@ -813,6 +819,8 @@ private:
 	bool _canPanic;
 	bool _canBeMindControlled;
 	int _berserkChance;
+
+	void loadRoles(const std::vector<int>& r);
 
 public:
 	/// Creates a blank unit ruleset.
@@ -848,6 +856,10 @@ public:
 	std::string getRace() const;
 	/// Gets the alien rank.
 	std::string getRank() const;
+	/// Gets the unit's role.
+	std::vector<SoldierRole> getRoles() const { return _roles; }
+	/// Gets the prisoner type.
+	const RulePrisoner* getPrisoner() const { return _prisoner; }
 	/// Gets the value - for score calculation.
 	int getValue() const;
 	/// Percentage modifier for morale loss when this unit is killed.
