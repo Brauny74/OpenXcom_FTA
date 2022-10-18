@@ -2509,7 +2509,7 @@ void GeoscapeState::time1Day()
 			// #FINNIKTODO - special project rules processing here!
 			if (intelProjectFinished && !completedIntelInformed)
 			{
-				_game->pushState(new IntelCompleteState(project, base, this));
+				_game->pushState(new IntelCompleteState(project, this, base));
 				completedIntelInformed = true;
 			}
 		}
